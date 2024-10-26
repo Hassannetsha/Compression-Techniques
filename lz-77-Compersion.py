@@ -6,7 +6,7 @@ def lz_77_Compression(data, s_buffer_size, la_buffer_size):
     while la_position < len(data):
         position = 0
         length = 0
-
+        finish = False
         la_buffer = data[la_position:la_position+la_buffer_size]
         longest_match = la_buffer[0]
         index = s_buffer.rfind(longest_match)
@@ -16,8 +16,12 @@ def lz_77_Compression(data, s_buffer_size, la_buffer_size):
             position = len(s_buffer) - index
             longest_match = la_buffer[:length+1]
             index = s_buffer.rfind(longest_match)
-
-        compressed_data.append( f"({position},{length},{longest_match[-1]})")
+            if (la_position + length) >= len(data):
+                finish = True
+        if not finish:
+            compressed_data.append( f"({position},{length},{longest_match[-1]})")
+        else:
+            compressed_data.append( f"({position},{length},{""})")
 
         s_buffer += data[la_position:la_position + length + 1]
         s_buffer = s_buffer[-s_buffer_size:]
@@ -32,6 +36,7 @@ def lz_77_adjusted_Compression(data, s_buffer_size, la_buffer_size):
         position = 0
         length = 0
         move_len = 0
+        finish = False
         la_buffer = data[la_position:la_position+la_buffer_size]
         longest_match = la_buffer[0]
         index = s_buffer.rfind(longest_match)
@@ -49,17 +54,17 @@ def lz_77_adjusted_Compression(data, s_buffer_size, la_buffer_size):
             longest_match = la_buffer[:length+1]
             index = s_buffer.rfind(longest_match)
             temp = len(s_buffer) - index
+            if (la_position + length) >= len(data):
+                finish = True
         b_s = longest_match
         b_len = length
         s_temp = s_temp[0:move_len] + longest_match[0:len(longest_match)-move_len]
-        finish = False
         while s_temp == longest_match and len(s_temp)!=1 and len(longest_match)<la_buffer_size and (la_position + length) < len(data):
             longest_match = la_buffer[:length+1]
             length += 1
             s_temp = s_temp[0:move_len] + longest_match[0:len(longest_match)-move_len]
             if (la_position + length) >= len(data):
                 finish = True
-        t = s_temp[0:b_len]
         symbol = ""
         if s_buffer[-position:]==s_temp[0:b_len-1] :
             length = len(longest_match)
@@ -74,7 +79,7 @@ def lz_77_adjusted_Compression(data, s_buffer_size, la_buffer_size):
         else:
             if not finish:
                 symbol = b_s[-1]
-            else:
+            elif b_len>1:
                 b_len+=1
             compressed_data.append( f"({position},{b_len},{symbol})")
             s_buffer += data[la_position:la_position + b_len+1]

@@ -7,7 +7,8 @@ def lz_77_Decompression(data:list):
         goBack = 0
         length = 0
         symbol = ""
-        for ch in range(len(position)):
+        ch = 0
+        while ch < len(position):
             num_buffer = ""
             if ctn==0 and position[ch].isdigit():
                 num_buffer += position[ch]
@@ -17,6 +18,7 @@ def lz_77_Decompression(data:list):
                     j+=1
                 goBack = int(num_buffer)
                 ctn+=1
+                ch+= j
             elif ctn==1 and position[ch].isdigit():
                 num_buffer += position[ch]
                 j = 1
@@ -25,6 +27,7 @@ def lz_77_Decompression(data:list):
                     j+=1
                 length = int(num_buffer)
                 ctn+=1
+                ch+=j
             elif ctn==2 and (position[ch].isalpha()or position[ch].isspace() or position[ch] in ".!?/\\|@#$%^&*\()-_"):
                 if((position[ch]=='N' or position[ch]=='n')and (position[ch+1]!='>' and position[ch+1]!=' ' and position[ch+1]!='\"')):
                     symbol = ""
@@ -37,10 +40,10 @@ def lz_77_Decompression(data:list):
                 else:
                     symbol = position[ch] + position[ch + 1]
                 break
-        goBack = len(original_data) - goBack
+            ch+=1
         for ch in range(0,length):
-            original_data+= original_data[goBack]
-            goBack+=1
+            original_data+= original_data[-goBack]
+            goBack-=1
         original_data+=symbol
         i+=1
     return original_data
