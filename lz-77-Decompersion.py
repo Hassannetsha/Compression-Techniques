@@ -25,8 +25,8 @@ def lz_77_Decompression(data:list):
                     j+=1
                 length = int(num_buffer)
                 ctn+=1
-            elif ctn==2 and position[ch].isalpha():
-                if((position[ch]=='N' or position[ch]=='n')and (position[ch]!='>' or position[ch]!=' ')):
+            elif ctn==2 and (position[ch].isalpha()or position[ch].isspace() or position[ch] in ".!?/\\|@#$%^&*\()-_"):
+                if((position[ch]=='N' or position[ch]=='n')and (position[ch+1]!='>' and position[ch+1]!=' ' and position[ch+1]!='\"')):
                     symbol = ""
                 else:
                     symbol = position[ch]
