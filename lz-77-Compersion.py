@@ -94,7 +94,7 @@ def main():
 
     s = 12
     la = 11
-    c = lz_77_adjusted_Compression(d, s, la)
+    c = lz_77_Compression(d, s, la)
 
     with open('compressed.txt', 'w') as file:
         for tag in c:
