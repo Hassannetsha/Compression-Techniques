@@ -27,12 +27,12 @@ def lz_W_Compression(Data):
 
 
 # print(ord(a))
-with open('lz-w/Input.txt', 'r') as file:
+with open('Lz-w/Input.txt', 'r') as file:
     Data = file.read()
 
 
 compressed_data = lz_W_Compression(Data)
 
 
-with open('lz-w/compressed_data.txt', 'w') as file:
+with open('Lz-w/compressed_data.txt', 'w') as file:
     file.write(f'{compressed_data}')
