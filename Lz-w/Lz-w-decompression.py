@@ -40,13 +40,13 @@ def lz_w_Decompression(data:list):
     return original_data
 
 def main():
-    with open('compressed_data.txt', 'r') as file:
+    with open('lz-w/compressed_data.txt', 'r') as file:
         content = file.read().strip()
 
     data = ast.literal_eval(content)
     original = lz_w_Decompression(data)
     
-    with open('decompresses_data.txt', 'w') as file:
+    with open('lz-w/decompresses_data.txt', 'w') as file:
         file.write(original)
 
 main()
