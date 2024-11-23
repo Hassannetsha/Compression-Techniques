@@ -1,3 +1,4 @@
+import pickle
 def mapping_characters(Probabilities):
     dic = {}
     Total_Probabilities = [Probabilities]
@@ -62,8 +63,10 @@ def Standard_Huffman_compression():
     compressed_data.append(Probabilities)
     for ch in Data:
         compressed_data.append(dic[ch])
-        
-    with open('Standard_Huffman/compressed_data.txt', 'w') as file:
-        for item in compressed_data:
-            file.write(f"{item}\n")
+    with open('Standard_Huffman/compressed_data.bin', 'wb') as file:
+        pickle.dump(compressed_data, file)
+    
+    # with open('Standard_Huffman/compressed_data.txt', 'w') as file:
+    #     for item in compressed_data:
+    #         file.write(f"{item}\n")
         
