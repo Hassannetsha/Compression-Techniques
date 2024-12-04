@@ -83,7 +83,7 @@ def float_arithmetic_decompression():
                  break
          size-=1
 
-     with open('Standard_Huffman/decompressed', 'w') as file:
+     with open('Float_Arithmetic/decompressed.txt', 'w') as file:
         file.write(decompress)
         
         
