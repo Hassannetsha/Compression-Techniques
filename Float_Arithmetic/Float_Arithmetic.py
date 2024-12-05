@@ -1,113 +1,106 @@
+from decimal import Decimal, getcontext
+
+getcontext().prec = 50
+
 def float_arithmetic_compression(data):
     dic = {}
     for ch in data:
-        if ch in dic:
-            dic[ch] += 1
+        if ch == " ":
+            key = "\\s"
+        elif ch == "\n":
+            key = "\\n"
+        elif ch == "\t":
+            key = "\\t"
         else:
-            dic[ch] = 1
-    
+            key = ch
 
-    # encoded_data = data.replace('\n', '\\n').replace(' ', '\\s').replace('\t', '\\t')
-    # # Update dictionary to include special sequences
-    # if '\\n' not in dic:
-    #     dic['\\n'] = 0
-    # if '\\s' not in dic:
-    #     dic['\\s'] = 0
-    # if '\\t' not in dic:
-    #     dic['\\t'] = 0
+        if key in dic:
+            dic[key] += 1
+        else:
+            dic[key] = 1
     
     probabilities = []
     for key in dic:
-        probabilities.append(dic[key]/len(data))
+        probabilities.append(Decimal(dic[key]) / Decimal(len(data)))
 
     ranges = []
-    cumulative_probability = 0
+    cumulative_probability = Decimal(0)
     for prob in probabilities:
         ranges.append((cumulative_probability, cumulative_probability+prob))
         cumulative_probability+=prob
     
     range_dic = dict(zip(dic,ranges))
-    lower=0
-    upper=1
+    lower = Decimal(0)
+    upper = Decimal(1)
 
     for ch in data:
+        if ch == " ":
+            key = "\\s"
+        elif ch == "\n":
+            key = "\\n"
+        elif ch == "\t":
+            key = "\\t"
+        else:
+            key = ch
+
         middle = upper - lower
-        lower = lower + middle * range_dic[ch][0]
-        upper = lower + middle * range_dic[ch][1]
+        upper = lower + middle * range_dic[key][1]
+        lower = lower + middle * range_dic[key][0]
+
 
     with open('Float_Arithmetic/compressed.txt', 'w') as file:
-        probability = dic[key] / len(data)
         for key in dic:
-            if key == " " or key == "\t" or key == "\n":
-                file.write(f"({key}) {probability}\n")
-            else:
-                file.write(f"{key} {probability}\n")
-        file.write(f"{(lower + upper) / 2}")
+            probability = Decimal(dic[key]) / Decimal(len(data))
+            file.write(f"{key} {probability}\n")
+        file.write(f"{(upper +lower)/2}\n")
         file.write(f"{len(data)}")
     
 
 def float_arithmetic_decompression():
      decompress = ""
-     code = 0
+     code = Decimal(0)
      size = 0
      
-     lower=0
-     higher=1
+     lower = Decimal(0)
+     upper = Decimal(1)
 
      range_dic = {} 
-     cumulative_probability = 0
+     cumulative_probability = Decimal(0)
      with open('Float_Arithmetic/compressed.txt', 'r') as file:
         for line in file:
             parts = line.strip(" ").split()
-            if len(parts) == 1 and code == 0:
-                code = float(parts[0])
+            if len(parts) == 1 and code == Decimal(0):
+                code = Decimal(parts[0])
             elif len(parts) == 1:
                 size = int(parts[0])
             elif len(parts) == 2:
-                range_dic[parts[0]] = (cumulative_probability, cumulative_probability+float(parts[1]))
-                cumulative_probability+=float(parts[1])
+                if parts[0] == "\\s":
+                    key = " "
+                elif parts[0] == "\\n":
+                    key = "\n"
+                elif parts[0] == "\\t":
+                    key = "\t"
+                else:
+                    key = parts[0]
+
+                range_dic[key] = (cumulative_probability, cumulative_probability + Decimal(parts[1]))
+                cumulative_probability += Decimal(parts[1])
             else:
-                print("a7a")
-                break
-
-
+                print("Error Parsing Data")
+                return
+    
+     OGcode = code
      while size!=0:
          
-         code = (code-lower)/(higher-lower)
-         for key in range_dic:
-             if code >= range_dic[key][0] and code <= range_dic[key][1]:
-                 decompress+=key
-                 middle = upper - lower
-                 lower = lower + middle * range_dic[key][0]
-                 upper = lower + middle * range_dic[key][1]
+         code = (OGcode-lower)/(upper-lower)
+         for key, (range_low, range_high) in range_dic.items():
+            if range_low <= code < range_high: 
+                 decompress += key
+                 range_width = upper - lower
+                 upper = lower + range_width * range_high
+                 lower = lower + range_width * range_low
                  break
          size-=1
 
      with open('Float_Arithmetic/decompressed.txt', 'w') as file:
         file.write(decompress)
-        
-        
-     
-     
-    
-
-
-
-
-file_data = ""
-with open('Float_Arithmetic/Input.txt', 'r') as file:
-    file_data = file.read()
-while(True):
-    print("Enter 1 if you want to compress the text in file called input.txt")
-    print("Enter 2 if you want to input text to compress.")
-    print("Enter 3 if you want to decompress the compressed data in file compressed_data")
-    print("Enter 0 if you want to Exit")
-    inp = int(input("Enter your choice: "))
-    if inp == 1:
-        float_arithmetic_compression(file_data)
-    elif inp==2:
-        float_arithmetic_compression(input("Input Text to be compressed: "))
-    elif inp==3:
-        float_arithmetic_decompression()
-    else:
-        break
