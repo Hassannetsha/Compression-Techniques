@@ -14,6 +14,6 @@ while(True):
     elif inp==2:
         float_arithmetic_compression(input("Input Text to be compressed: "))
     elif inp==3:
-        float_arithmetic_decompression()
+        float_arithmetic_decompression(True)
     else:
         break
