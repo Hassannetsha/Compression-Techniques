@@ -40,14 +40,10 @@ def compression(img,new_height,new_width,block_height,block_width,codeBookSize):
     cnt= 0
     img = divide_into_blocks(img,block_height,block_width)
     avg = calculate_avg(img,block_height,block_width)
-    degree = avg.shape
-
-# Calculate first_key and second_key
-    first_key = tuple(np.floor(avg).flatten()) - tuple(np.ones(degree).flatten())
-    second_key = tuple(np.ceil(avg).flatten())
-
-# Create the dictionary with hashable keys
-    dic = {first_key: [], second_key: []}
+    degree = (block_height,block_width)
+    first_key = np.floor(avg)-np.ones(degree)
+    second_key = np.ceil(avg)
+    dic = {first_key:[],second_key:[]}
     while True:
         break
 image_name = '1.jpg'
