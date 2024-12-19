@@ -43,7 +43,8 @@ def compression(img,new_height,new_width,block_height,block_width,codeBookSize):
     degree = (block_height,block_width)
     first_key = np.floor(avg)-np.ones(degree)
     second_key = np.ceil(avg)
-    dic = {first_key:[],second_key:[]}
+    dicIndex = {0:first_key,1:second_key}
+    dicArrayWithMe = {0:[],1:[]}
     while True:
         break
 image_name = '1.jpg'
