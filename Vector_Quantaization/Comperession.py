@@ -45,6 +45,7 @@ def go_nearest(img,dicIndex,dicPlace):
 
 def compression(img,block_height,block_width,codeBookSize):
     # ctn= 0
+    h,w = img.shape
     img = divide_into_blocks(img,block_height,block_width)
     avg = calculate_avg(img,block_height,block_width)
     degree = (block_height,block_width)
@@ -83,16 +84,25 @@ def compression(img,block_height,block_width,codeBookSize):
     # for key in dicPlace:
     #     dicPlace[key] = [np.array(val, dtype=np.int64) for val in dicPlace[key]]
     # for l in range(len(img)):
+    dicTemp = {
+        tuple(map(tuple, value)) : key
+        for key, value in dicAverage.items()
+    }
+    dicAverage = dicTemp
     compressed_list = []
+    lis = []
     for block in img:
         for index, val in dicPlace.items():
             if any(np.array_equal(block, existing_block) 
                     for existing_block in val):
-                compressed_list.append(index)
+                lis.append(index)
                 break
+        if  len(lis)==(w//block_width):
+            compressed_list.append(lis)
+            lis = []
     with open('Vector_Quantaization/compressed_data.txt', 'w') as file:
-        file.write(f'{compressed_list}\n')
-        file.write(f'{dicAverage}')
+        file.write(f'{compressed_list}\n{dicAverage}')
+        # file.write(f'')
     
 image_name = '1.jpg'
 img = Image.open(image_name)
