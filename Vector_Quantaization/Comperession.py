@@ -1,12 +1,5 @@
-# #1. a gray scale image file
-# # 2. the block size
-# # 3. code book size
-# from decimal import Decimal, getcontext
-# [[[1,2],[3,4]],[]]
 from PIL import Image
 import numpy as np
-import math
-# getcontext().prec = 10000
 def absolute_difference(a, b):
     return np.sum(np.abs(a - b))
 def calculate_avg(padded_array,block_height,block_width):
@@ -18,14 +11,8 @@ def calculate_avg(padded_array,block_height,block_width):
             for l in range(0,len(padded_array)):
                 averages[i][j] += padded_array[l][i][j]
             averages[i][j]/=no_blocks
-
-    # Calculate the average for each block
-    # for i in range(block_height):
-    #     for j in range(block_width):
-    #             averages[i][j] /= no_blocks
     return averages
 def divide_into_blocks(image,block_height,block_width):
-    """Divides an image into non-overlapping blocks of size block_size x block_size."""
     h, w = image.shape
     blocks = []
     for i in range(0, h, block_height):
@@ -34,19 +21,79 @@ def divide_into_blocks(image,block_height,block_width):
             if block.shape == (block_height, block_width):
                 blocks.append(block)
     return blocks
-# def go_nearest():
-    
-def compression(img,new_height,new_width,block_height,block_width,codeBookSize):
-    cnt= 0
+def go_nearest(img,dicIndex,dicPlace):
+    for block in img:
+        min_diff = float('inf')
+        closest_index = None
+        for index,average in dicIndex.items():
+            diff  = absolute_difference(block,average)
+            if diff < min_diff:
+                min_diff = diff
+                closest_index = index
+        block_tuple = tuple(map(tuple, block))
+
+        if block_tuple not in dicPlace[closest_index]:
+            # ctn += 1
+            dicPlace[closest_index].add(block_tuple)
+
+            for index in dicPlace.keys():
+                if index != closest_index:
+                    dicPlace[index].discard(block_tuple)
+
+    for key in dicPlace.keys():
+        dicPlace[key] = [np.array(block) for block in dicPlace[key]]
+
+def compression(img,block_height,block_width,codeBookSize):
+    # ctn= 0
     img = divide_into_blocks(img,block_height,block_width)
     avg = calculate_avg(img,block_height,block_width)
     degree = (block_height,block_width)
     first_key = np.floor(avg)-np.ones(degree)
     second_key = np.ceil(avg)
-    dicIndex = {0:first_key,1:second_key}
-    dicArrayWithMe = {0:[],1:[]}
-    while True:
-        break
+    dicAverage = {0:first_key,1:second_key}
+    dicPlace = {0:[],1:[]}
+    for block in img:
+        dicPlace[0].append(block)
+    dicPlace = {
+        key: {tuple(map(tuple, block)) for block in value}
+        for key, value in dicPlace.items()
+    }
+    go_nearest(img,dicAverage,dicPlace)
+    for index in dicAverage.keys():
+        dicAverage[index] = calculate_avg(dicPlace[index],block_height,block_width)
+    while len(dicAverage)<codeBookSize:
+        key = 0
+        dicTemp = {}
+        for val in dicAverage.values():
+            dicTemp[key] = np.floor(val)-np.ones(degree)
+            key+=1
+            dicTemp[key] = np.ceil(val)
+            key+=1
+        dicAverage = dicTemp
+        for i in range(len(dicPlace),key):
+            dicPlace[i] = []
+        dicPlace = {
+            key: {tuple(map(tuple, block)) for block in value}
+            for key, value in dicPlace.items()
+        }
+        go_nearest(img,dicAverage,dicPlace)
+        for index in dicAverage.keys():
+            if dicPlace[index]:
+                dicAverage[index] = calculate_avg(dicPlace[index],block_height,block_width)
+    # for key in dicPlace:
+    #     dicPlace[key] = [np.array(val, dtype=np.int64) for val in dicPlace[key]]
+    # for l in range(len(img)):
+    compressed_list = []
+    for block in img:
+        for index, val in dicPlace.items():
+            if any(np.array_equal(block, existing_block) 
+                    for existing_block in val):
+                compressed_list.append(index)
+                break
+    with open('Vector_Quantaization/compressed_data.txt', 'w') as file:
+        file.write(f'{compressed_list}\n')
+        file.write(f'{dicAverage}')
+    
 image_name = '1.jpg'
 img = Image.open(image_name)
 img = img.convert('L')
@@ -71,66 +118,16 @@ if addition_height > 0:
     last_row = padded_array[-1, :].reshape(1, -1)  # Extract the last row
     padded_array = np.concatenate([padded_array, np.tile(last_row, (addition_height, 1))], axis=0)
 codeBookSize = 8
-compression(padded_array,old_height+addition_height,old_width + addition_width,new_height,new_width,codeBookSize)
+compression(padded_array,new_height,new_width,codeBookSize)
+# arr = np.array([
+#     [1, 2, 7, 9, 4, 11],
+#     [3, 4, 6, 6, 12, 12],
+#     [4, 9, 15, 14, 9, 9],
+#     [10, 10, 20, 18, 8, 8],
+#     [4, 3, 17, 16, 1, 4],
+#     [4, 5, 18, 18, 5, 6]
+# ])
+
+# compression(arr,2,2,4)
+
 # padded_img = Image.fromarray(padded_array.astype(np.uint8))
-
-
-# padded_img.save('compressed_image.jpg')
-# from PIL import Image
-# import numpy as np
-
-# # Load the grayscale image
-# image_name = '1.jpg'
-# img = Image.open(image_name)
-# img  = img.convert('L')  # Convert to grayscale
-# img_array = np.array(img)
-
-# # Define block size
-# block_height = 8
-# block_width = 8
-
-# # Get image dimensions
-# height, width = img_array.shape
-
-# # Ensure the dimensions are divisible by the block size
-# padded_height = height + (block_height - height % block_height) % block_height
-# padded_width = width + (block_width - width % block_width) % block_width
-# addition_width = padded_width - width
-# if addition_width > 0:
-#     last_column = img_array[:, -1:]  # Extract the last column
-#     padded_array = np.concatenate([img_array, np.tile(last_column, (1, addition_width))], axis=1)
-# else:
-#     padded_array = img_array
-# addition_height = padded_height - height
-# if addition_height > 0:
-#     last_row = padded_array[-1, :].reshape(1, -1)  # Extract the last row
-#     padded_array = np.concatenate([padded_array, np.tile(last_row, (addition_height, 1))], axis=0)
-# # padded_image = np.pad(
-# #     img_array,
-# #     ((0, padded_height - height), (0, padded_width - width)),
-# #     mode='edge'
-# # )
-# # padded_image = Image.fromarray(padded_array.astype(np.uint8))
-# # Perform vector quantization
-# codebook = []
-# quantized_image = padded_array.copy()
-
-# # Process blocks manually
-# for i in range(0, padded_height, block_height):
-#     for j in range(0, padded_width, block_width):
-#         # Extract the block
-#         block = padded_array[i:i + block_height, j:j + block_width]
-        
-#         # Calculate the average value of the block
-#         block_average = np.mean(block)
-#         codebook.append(block_average)
-#         # Replace the block with its average value
-#         quantized_image[i:i + block_height, j:j + block_width] = block_average
-
-# # Convert the quantized image back to a PIL image for visualization
-# quantized_img = Image.fromarray(quantized_image.astype(np.uint8))
-
-# # Save or display the image
-# quantized_img.save('quantized_image.jpg')
-# # quantized_img.show()
-# print("Codebook:", codebook)
