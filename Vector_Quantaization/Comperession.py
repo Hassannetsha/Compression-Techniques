@@ -128,16 +128,16 @@ if addition_height > 0:
     last_row = padded_array[-1, :].reshape(1, -1)  # Extract the last row
     padded_array = np.concatenate([padded_array, np.tile(last_row, (addition_height, 1))], axis=0)
 codeBookSize = 8
-compression(padded_array,new_height,new_width,codeBookSize)
-# arr = np.array([
-#     [1, 2, 7, 9, 4, 11],
-#     [3, 4, 6, 6, 12, 12],
-#     [4, 9, 15, 14, 9, 9],
-#     [10, 10, 20, 18, 8, 8],
-#     [4, 3, 17, 16, 1, 4],
-#     [4, 5, 18, 18, 5, 6]
-# ])
+# compression(padded_array,new_height,new_width,codeBookSize)
+arr = np.array([
+    [1, 2, 7, 9, 4, 11],
+    [3, 4, 6, 6, 12, 12],
+    [4, 9, 15, 14, 9, 9],
+    [10, 10, 20, 18, 8, 8],
+    [4, 3, 17, 16, 1, 4],
+    [4, 5, 18, 18, 5, 6]
+])
 
-# compression(arr,2,2,4)
+compression(arr,2,2,4)
 
 # padded_img = Image.fromarray(padded_array.astype(np.uint8))
