@@ -36,11 +36,11 @@ def decompression(file_path):
 
     # Save the image
     img = Image.fromarray(full_image)
-    img.save("decompressed.jpg")
-    print("Image saved as 'reconstructed_image.jpg'.")
+    img.save("decompressed_img.jpg")
+    # print("Image saved as 'reconstructed_image.jpg'.")
 
     # print(original_image_height,original_image_width)
 
 # Example usage
-file_path = "Vector_Quantaization/compressed_data.txt"
-reconstructed_image = decompression(file_path)
+# file_path = ""
+# reconstructed_image = decompression(file_path)

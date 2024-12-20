@@ -1,4 +1,3 @@
-from PIL import Image
 import numpy as np
 def absolute_difference(a, b):
     return np.sum(np.abs(a - b))
@@ -44,7 +43,22 @@ def go_nearest(img,dicIndex,dicPlace):
         dicPlace[key] = [np.array(block) for block in dicPlace[key]]
 
 def compression(img,block_height,block_width,codeBookSize):
-    # ctn= 0
+    old_width, old_height = img.size
+    addition_height = (block_height - (old_height % block_height)) % block_height
+    addition_width = (block_width - (old_width % block_width)) % block_width
+
+    img = np.array(img)
+
+    if addition_width > 0:
+        last_column = img[:, -1:]  # Extract the last column
+        padded_array = np.concatenate([img, np.tile(last_column, (1, addition_width))], axis=1)
+    else:
+        padded_array = img
+
+    if addition_height > 0:
+        last_row = padded_array[-1, :].reshape(1, -1)  # Extract the last row
+        padded_array = np.concatenate([padded_array, np.tile(last_row, (addition_height, 1))], axis=0)
+    img = padded_array
     h,w = img.shape
     img = divide_into_blocks(img,block_height,block_width)
     avg = calculate_avg(img,block_height,block_width)
@@ -91,44 +105,23 @@ def compression(img,block_height,block_width,codeBookSize):
     dicAverage = dicTemp
     compressed_list = []
     lis = []
+    dicPlace_sets = {index: {tuple(map(tuple, val)) for val in dicPlace[index]} for index in dicPlace}
     for block in img:
-        for index, val in dicPlace.items():
-            if any(np.array_equal(block, existing_block) 
-                    for existing_block in val):
+        for index, val_set in dicPlace_sets.items():
+            block_tuple = tuple(map(tuple, block))  # Convert the block to a tuple
+            if block_tuple in val_set:  # Check for membership in the set
                 lis.append(index)
                 break
-        if  len(lis)==(w//block_width):
+        if len(lis) == (w // block_width):
             compressed_list.append(lis)
             lis = []
-    with open('Vector_Quantaization/compressed_data.txt', 'w') as file:
+    with open('Vector_Quantization/compressed_data.txt', 'w') as file:
         file.write(f'{compressed_list}\n{dicAverage}')
-        # file.write(f'')
     
-image_name = '1.jpg'
-img = Image.open(image_name)
-img = img.convert('L')
 
-old_width, old_height = img.size
 
-new_height = 7
-new_width = 5
 
-addition_height = (new_height - (old_height % new_height)) % new_height
-addition_width = (new_width - (old_width % new_width)) % new_width
-
-img_array = np.array(img)
-
-if addition_width > 0:
-    last_column = img_array[:, -1:]  # Extract the last column
-    padded_array = np.concatenate([img_array, np.tile(last_column, (1, addition_width))], axis=1)
-else:
-    padded_array = img_array
-
-if addition_height > 0:
-    last_row = padded_array[-1, :].reshape(1, -1)  # Extract the last row
-    padded_array = np.concatenate([padded_array, np.tile(last_row, (addition_height, 1))], axis=0)
-codeBookSize = 8
-compression(padded_array,new_height,new_width,codeBookSize)
+# compression(img,new_height,new_width,codeBookSize)
 # arr = np.array([
 #     [1, 2, 7, 9, 4, 11],
 #     [3, 4, 6, 6, 12, 12],
