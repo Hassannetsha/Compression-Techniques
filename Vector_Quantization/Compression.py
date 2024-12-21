@@ -20,7 +20,7 @@ def divide_into_blocks(image,block_height,block_width):
             if block.shape == (block_height, block_width):
                 blocks.append(block)
     return blocks
-def go_nearest(img,dicIndex,dicPlace):
+def go_nearest(img,dicIndex,dicPlace,ctn):
     for block in img:
         min_diff = float('inf')
         closest_index = None
@@ -32,7 +32,7 @@ def go_nearest(img,dicIndex,dicPlace):
         block_tuple = tuple(map(tuple, block))
 
         if block_tuple not in dicPlace[closest_index]:
-            # ctn += 1
+            ctn += 1
             dicPlace[closest_index].add(block_tuple)
 
             for index in dicPlace.keys():
@@ -41,6 +41,7 @@ def go_nearest(img,dicIndex,dicPlace):
 
     for key in dicPlace.keys():
         dicPlace[key] = [np.array(block) for block in dicPlace[key]]
+    return ctn
 
 def compression(img,block_height,block_width,codeBookSize):
     old_width, old_height = img.size
@@ -73,7 +74,8 @@ def compression(img,block_height,block_width,codeBookSize):
         key: {tuple(map(tuple, block)) for block in value}
         for key, value in dicPlace.items()
     }
-    go_nearest(img,dicAverage,dicPlace)
+    ctn = 0
+    ctn = go_nearest(img,dicAverage,dicPlace,ctn)
     for index in dicAverage.keys():
         dicAverage[index] = calculate_avg(dicPlace[index],block_height,block_width)
     while len(dicAverage)<codeBookSize:
@@ -91,13 +93,25 @@ def compression(img,block_height,block_width,codeBookSize):
             key: {tuple(map(tuple, block)) for block in value}
             for key, value in dicPlace.items()
         }
-        go_nearest(img,dicAverage,dicPlace)
+        ctn = go_nearest(img,dicAverage,dicPlace,ctn)
         for index in dicAverage.keys():
             if dicPlace[index]:
                 dicAverage[index] = calculate_avg(dicPlace[index],block_height,block_width)
-    # for key in dicPlace:
-    #     dicPlace[key] = [np.array(val, dtype=np.int64) for val in dicPlace[key]]
-    # for l in range(len(img)):
+    min_ctn = 100
+    while ctn>=min_ctn:
+        dicPlace = {
+            key: {tuple(map(tuple, block)) for block in value}
+            for key, value in dicPlace.items()
+        }
+        prev_ctn = ctn
+        ctn = 0
+        ctn = go_nearest(img,dicAverage,dicPlace,ctn)
+        min_ctn = min(min_ctn,ctn)
+        if prev_ctn<ctn:
+            break
+        for index in dicAverage.keys():
+            if dicPlace[index]:
+                dicAverage[index] = calculate_avg(dicPlace[index],block_height,block_width)
     dicTemp = {
         tuple(map(tuple, value)) : key
         for key, value in dicAverage.items()
