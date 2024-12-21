@@ -27,20 +27,11 @@ def decompression(file_path):
 
     full_image = np.zeros((original_image_height, original_image_width), dtype=np.uint8)
 
-    # Stitch the blocks into the full image
     for i, row_blocks in enumerate(reconstructed_image):
         for j, block in enumerate(row_blocks):
             start_row = i * blockheight
             start_col = j * blockwidth
             full_image[start_row:start_row + blockheight, start_col:start_col + blockwidth] = block
 
-    # Save the image
     img = Image.fromarray(full_image)
     img.save("decompressed_img.jpg")
-    # print("Image saved as 'reconstructed_image.jpg'.")
-
-    # print(original_image_height,original_image_width)
-
-# Example usage
-# file_path = ""
-# reconstructed_image = decompression(file_path)

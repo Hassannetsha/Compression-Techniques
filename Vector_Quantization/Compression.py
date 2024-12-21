@@ -51,13 +51,13 @@ def compression(img,block_height,block_width,codeBookSize):
     img = np.array(img)
 
     if addition_width > 0:
-        last_column = img[:, -1:]  # Extract the last column
+        last_column = img[:, -1:]
         padded_array = np.concatenate([img, np.tile(last_column, (1, addition_width))], axis=1)
     else:
         padded_array = img
 
     if addition_height > 0:
-        last_row = padded_array[-1, :].reshape(1, -1)  # Extract the last row
+        last_row = padded_array[-1, :].reshape(1, -1)
         padded_array = np.concatenate([padded_array, np.tile(last_row, (addition_height, 1))], axis=0)
     img = padded_array
     h,w = img.shape
@@ -122,8 +122,8 @@ def compression(img,block_height,block_width,codeBookSize):
     dicPlace_sets = {index: {tuple(map(tuple, val)) for val in dicPlace[index]} for index in dicPlace}
     for block in img:
         for index, val_set in dicPlace_sets.items():
-            block_tuple = tuple(map(tuple, block))  # Convert the block to a tuple
-            if block_tuple in val_set:  # Check for membership in the set
+            block_tuple = tuple(map(tuple, block))
+            if block_tuple in val_set:
                 lis.append(index)
                 break
         if len(lis) == (w // block_width):
